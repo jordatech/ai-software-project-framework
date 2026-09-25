@@ -1,0 +1,177 @@
+# AGENTS.md
+
+Instructions for autonomous and semi-autonomous coding agents working in this repository.
+
+## 1. Authority model
+
+Humans set product intent, approve scope, approve significant decisions, and approve merges.
+
+Agents may:
+
+- inspect the repository;
+- propose a short plan;
+- implement approved requirements;
+- create or update automated tests;
+- update documentation affected by the change;
+- add newly discovered ideas to `FUTURE_WORK.md`;
+- draft ADRs and TDRs;
+- run non-destructive validation;
+- prepare commits and pull requests.
+
+Agents must not:
+
+- silently add product scope;
+- promote future work into approved requirements without human approval;
+- accept their own newly invented significant architecture decision;
+- merge their own work under the current operating model;
+- commit directly to `main`/production branches;
+- use destructive commands, rotate secrets, alter production data, change permissions, or modify infrastructure without explicit human approval;
+- hide failed validation, security concerns, or unresolved trade-offs.
+
+## 2. Read before planning
+
+For every meaningful change, read the relevant parts of:
+
+1. `README.md`
+2. `REQUIREMENTS.md`
+3. `SPRINT.md`
+4. `docs/ARCHITECTURE.md`
+5. relevant files in `docs/adr/`
+6. relevant files in `docs/tdr/`
+7. `FUTURE_WORK.md` when scope or follow-up work is involved
+
+Repository-local instructions and approved requirements are the primary source of truth.
+
+## 3. Requirement discipline
+
+Implementation work should trace to one or more `REQ-###` entries.
+
+Before editing, summarize:
+
+- the requirement IDs being implemented;
+- the acceptance criteria;
+- the files/components likely to change;
+- assumptions or ambiguities;
+- the validation that will prove the change works.
+
+If the requested work is not covered by an approved requirement, do one of the following:
+
+- ask for human approval to add/modify the requirement; or
+- record the idea in `FUTURE_WORK.md` if it is not part of the current scope.
+
+Do not invent scope merely because it seems useful.
+
+## 4. Planning and execution
+
+Before meaningful edits, provide a short implementation plan. Keep the plan proportional to the change.
+
+During execution:
+
+- work in a dedicated branch/worktree/sandbox;
+- keep the diff focused;
+- follow the existing architecture and project conventions;
+- prefer readable, conventional code over clever code;
+- avoid unrelated cleanup;
+- preserve backward compatibility unless an approved requirement or ADR says otherwise;
+- update affected documentation in the same change.
+
+If the implementation grows materially beyond the approved plan, stop and surface the scope increase.
+
+## 5. Significant decisions and ADRs
+
+Create or update an ADR when a change makes a significant, durable decision about architecture, major dependencies, data/storage, external integrations, security boundaries, deployment model, scalability approach, or another choice that future maintainers are likely to ask "why did we choose this?"
+
+### Human-directed decision
+
+If a human explicitly made the decision, the agent may record it as `Status: Accepted`. The ADR must still be called out in the pull request so the human sees what was recorded.
+
+### Agent-originated decision
+
+If the agent concludes a significant decision is needed, create a draft ADR with `Status: Proposed` and surface it for human approval. Do not treat it as approved until a human accepts it.
+
+Use `docs/adr/TEMPLATE.md`.
+
+## 6. Technical debt and TDRs
+
+Create a TDR when a change intentionally leaves known technical debt such as a shortcut, workaround, temporary design, missing test, manual step, or deferred reliability/security/performance/maintainability improvement.
+
+Use `docs/tdr/TEMPLATE.md` and keep the record concise.
+
+An agent may propose a TDR, but the human reviewer should confirm that the debt is acceptable and that the owner is appropriate.
+
+## 7. Validation
+
+Use the exact validation commands documented by the project once the implementation stack is selected.
+
+Run all checks relevant to the change, such as:
+
+- formatting;
+- lint/static analysis;
+- type checking where applicable;
+- unit tests;
+- integration tests;
+- end-to-end tests where applicable;
+- build/package validation;
+- security/secret/dependency checks;
+- deployment or readiness checks when relevant.
+
+Report exactly what passed, failed, or was not run. Never imply that a check passed if it was skipped or unavailable.
+
+If expected commands are not documented, surface that as an agent-readiness gap instead of guessing silently.
+
+## 8. Security and data handling
+
+- Do not commit secrets, credentials, private keys, access tokens, or sensitive customer/company data.
+- Treat generated shell commands, migrations, dependencies, and configuration changes as untrusted until reviewed.
+- Do not weaken authentication, authorization, encryption, logging, isolation, or monitoring merely to make a task easier.
+- Surface security-sensitive behavior for explicit human review.
+
+## 9. Git and pull requests
+
+Startup Teams Git policy applies unless a stricter project policy is documented.
+
+- Use a dedicated branch; direct commits to `main`/production branches are prohibited.
+- Branch format: `type/ticket-short-description` (for example, `feat/AGR-24-bnpl-checkout`).
+- Commit format: `type(scope): short description (#issue-id)`.
+- Commit scope is required.
+- Every commit must reference the related issue/ticket.
+- Keep commits and PRs small enough to review.
+- Required validation must pass before merge.
+- A human reviewer must approve before merge under the current operating model.
+
+Every PR should state:
+
+- feature / requirement IDs;
+- what changed and why;
+- files/components changed;
+- validation performed and results;
+- known risks or limitations;
+- documentation changes;
+- ADRs/TDRs added or changed;
+- future-work items discovered;
+- reviewer focus areas.
+
+## 10. Stop and ask for human judgment when
+
+- requirements conflict or are materially ambiguous;
+- a new significant ADR decision is required;
+- credentials or restricted access are required;
+- a destructive action is needed;
+- tests fail unexpectedly and the cause is not understood;
+- security-sensitive behavior changes;
+- production data or infrastructure would be changed;
+- the diff grows substantially beyond the planned scope;
+- a future-work idea would need to become approved product scope.
+
+## 11. Handoff standard
+
+At the end of a work session or before handing work to another agent/human, provide:
+
+1. requirement IDs addressed;
+2. concise summary of changes;
+3. files changed;
+4. validation commands and results;
+5. known risks / unresolved questions;
+6. ADR/TDR status;
+7. future-work items discovered;
+8. recommended next action.
